@@ -5,7 +5,8 @@ package szabivan.loginfalk.data;
  * 
  * Currently only the negation (NOT) is unary.
  * 
- * TODO extending to first-order, should be quantifiers be here as some derivated sub-enum?
+ * TODO extending to first-order, should be quantifiers be here as some
+ * derivated sub-enum?
  * 
  * @author szabivan
  * @see Connective
@@ -13,10 +14,17 @@ package szabivan.loginfalk.data;
 public enum UnaryConnective implements Connective {
 	NOT("¬");
 	/**
-	 * Instances of this enum are specified by giving a "name" which is given back by {@link #toString()}.
+	 * Instances of this enum are specified by giving a "name" which is given
+	 * back by {@link #toString()}.
 	 */
 	private final String name;
-	private UnaryConnective(String name){ this.name = name; }
+
+	private UnaryConnective(String name) {
+		this.name = name;
+	}
+
 	@Override
-	public String toString(){ return name; }
+	public String toString() {
+		return name;
+	}
 }

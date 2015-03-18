@@ -11,13 +11,11 @@ public class ResolutionExercise {
 	public final Set<Integer> sigmaPrime;
 	public final Vector<ClauseReason> solution;
 
-	public ResolutionExercise(
-			SigmaFPair input,
-			Set<Integer> sigmaPrime,
+	public ResolutionExercise(SigmaFPair input, Set<Integer> sigmaPrime,
 			Vector<ClauseReason> solution) {
-				this.input = input;
-				this.sigmaPrime = sigmaPrime;
-				this.solution = solution;
+		this.input = input;
+		this.sigmaPrime = sigmaPrime;
+		this.solution = solution;
 	}
 
 }

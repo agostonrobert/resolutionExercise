@@ -1,4 +1,5 @@
 package szabivan.loginfalk.data;
+
 /**
  * A Pair< Set<Formula>, Formula> class.
  * 
@@ -12,9 +13,12 @@ package szabivan.loginfalk.data;
 import java.util.Set;
 
 public class SigmaFPair {
-	
-	public final Set< Formula > sigma;
+
+	public final Set<Formula> sigma;
 	public final Formula f;
-	
-	public SigmaFPair( Set<Formula> sigma, Formula f ){ this.sigma = sigma; this.f = f; }
+
+	public SigmaFPair(Set<Formula> sigma, Formula f) {
+		this.sigma = sigma;
+		this.f = f;
+	}
 }
