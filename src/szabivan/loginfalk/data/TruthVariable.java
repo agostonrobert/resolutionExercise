@@ -77,7 +77,7 @@ public class TruthVariable implements Formula, Comparable<TruthVariable> {
 	 *         specified parameters. Otherwise, returns <code>false</code> and
 	 *         no new instance is constructed.
 	 */
-	public static boolean registerVariable(int index, String name) {
+	private static boolean registerVariable(int index, String name) {
 		if (lookupTableInt.containsKey(index))
 			return false;
 		if (lookupTableString.containsKey(name))
@@ -156,5 +156,13 @@ public class TruthVariable implements Formula, Comparable<TruthVariable> {
 	public static void registerDefaults() {
 		for (int i = 0; i < 7; i++)
 			registerVariable(i, Character.toString((char) ('p' + i)));
+	}
+
+	public Integer toClause() {
+		return 1 << (2 * varIndex);
+	}
+
+	public Integer toNegatedClause() {
+		return 1 << (1 + 2 * varIndex);
 	}
 }

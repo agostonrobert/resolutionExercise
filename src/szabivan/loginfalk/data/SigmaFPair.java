@@ -10,15 +10,25 @@ package szabivan.loginfalk.data;
  * @version 1.0
  */
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class SigmaFPair {
 
-	public final Set<Formula> sigma;
+	public final Sigma sigma;
 	public final Formula f;
 
-	public SigmaFPair(Set<Formula> sigma, Formula f) {
+	public SigmaFPair(Sigma sigma, Formula f) {
 		this.sigma = sigma;
 		this.f = f;
+	}
+
+	public Set<Integer> createCnf() {
+		Set<Integer> ret = new HashSet<Integer>();
+		for (Formula form : sigma) {
+			ret.addAll(CnfComputer.createCnf(form, true));
+		}
+		ret.addAll(CnfComputer.createCnf(f, false));
+		return ret;
 	}
 }

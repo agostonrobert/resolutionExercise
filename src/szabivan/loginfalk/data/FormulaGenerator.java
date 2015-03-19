@@ -12,7 +12,6 @@ package szabivan.loginfalk.data;
  */
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
@@ -24,7 +23,7 @@ public class FormulaGenerator {
 	private static Random random = new Random();
 
 	// each connective has a positive weight stored in this map
-	private Map<Connective, Integer> weightMap = new HashMap<Connective, Integer>();
+	private Map<String, Integer> weightMap = new HashMap<String, Integer>();
 	// the weight of generating an atomic formula is also a positive integer
 	private int atomicWeight;
 	// totalWeight is simply the sum of all the weights above
@@ -60,7 +59,7 @@ public class FormulaGenerator {
 	 *         <code>true</code>. Passing a negative weight is invalid, in that
 	 *         case nothing happens and the method returns <code>false</code>.
 	 */
-	public boolean setWeight(Connective conn, int weight) {
+	public boolean setWeight(String conn, int weight) {
 		if (weight < 0)
 			return false;
 		if (weightMap.containsKey(conn)) {
@@ -128,27 +127,43 @@ public class FormulaGenerator {
 		if (rand < 0 || depth == 0) {
 			return TruthVariable.getVariable(random.nextInt(this.varCount));
 		}
-		Iterator<Map.Entry<Connective, Integer>> iterator = this.weightMap
+		Iterator<Map.Entry<String, Integer>> iterator = this.weightMap
 				.entrySet().iterator();
-		Map.Entry<Connective, Integer> entry = null;
+		Map.Entry<String, Integer> entry = null;
 		do {
 			entry = iterator.next();
 			rand -= entry.getValue();
 		} while (rand >= 0);
-		Connective conn = entry.getKey();
-		if (conn instanceof UnaryConnective) {
-			return new CompoundFormula(conn,
-					new Formula[] { generateFormula(depth - 1) });
+
+		String conn = entry.getKey();
+
+		if (Not.CONNECTIVE_STRING.equals(conn)) {
+			return new Not(generateSubFormulas(1, depth - 1));
+		} else if (And.CONNECTIVE_STRING.equals(conn)) {
+			return new And(generateSubFormulas(2, depth - 1));
+		} else if (Or.CONNECTIVE_STRING.equals(conn)) {
+			return new Or(generateSubFormulas(2, depth - 1));
+		} else if (Xor.CONNECTIVE_STRING.equals(conn)) {
+			return new Xor(generateSubFormulas(2, depth - 1));
+		} else if (Iff.CONNECTIVE_STRING.equals(conn)) {
+			return new Iff(generateSubFormulas(2, depth - 1));
+		} else if (Implies.CONNECTIVE_STRING.equals(conn)) {
+			return new Implies(generateSubFormulas(2, depth - 1));
 		}
-		if ((conn instanceof BinaryConnective)
-				|| (conn instanceof AssociativeConnective)) {
-			return new CompoundFormula(conn, new Formula[] {
-					generateFormula(depth - 1), generateFormula(depth - 1) });
-		}
+
 		throw new IllegalStateException(
 				"Houston, we have a serious problem with the random generator!");
 	}
 
+	private Formula[] generateSubFormulas(int num, int depth) {
+		Formula[] formulas = new Formula[num];
+		for (int i = 0; i < num; i++) {
+			formulas[i] = generateFormula(depth);
+		}
+
+		return formulas;
+	}
+	
 	/**
 	 * Generates an unsatisfiable set of formulas.
 	 * 
@@ -156,31 +171,31 @@ public class FormulaGenerator {
 	 *         unsatisfiable one.
 	 * @see #generateFormula(int).
 	 */
-	public Set<Formula> generateUnsatSigma() {
+	public Sigma generateUnsatSigma() {
 		Vector<Formula> formulas = new Vector<Formula>();
 		Vector<Set<Integer>> valuations = new Vector<Set<Integer>>();
 		Set<Integer> wedgeAll = Collections.singleton((Integer) 0);
-		Set<Formula> ret = new HashSet<Formula>();
+		Sigma ret = new Sigma();
 		do {
-			Formula formula = generateFormula(this.maxDepth).normalize();
-			formulas.add(formula);
-			Set<Integer> current = TruthTableComputer.getValuations(formula,
-					true);
+			Formula formula = generateFormula(this.maxDepth);
+			Formula normalized = formula.normalize();
+			formulas.add(normalized);
+			Set<Integer> current = TruthTableComputer.getValuations(normalized, true);
 			valuations.add(current);
-			wedgeAll = TruthTableComputer.wedgeValuations(wedgeAll, current);
+			wedgeAll = Clause.wedgeValuations(wedgeAll, current);
 		} while (!wedgeAll.isEmpty());
 		Set<Integer> prefixValuation = Collections.singleton((Integer) 0);
 		for (int i = 0; i < formulas.size(); i++) {
 			wedgeAll = prefixValuation;
 			for (int j = i + 1; j < formulas.size(); j++) {
-				wedgeAll = TruthTableComputer.wedgeValuations(wedgeAll,
+				wedgeAll = Clause.wedgeValuations(wedgeAll,
 						valuations.elementAt(j));
 			}
 			if (wedgeAll.isEmpty()) {
 
 			} else {
 				ret.add(formulas.elementAt(i));
-				prefixValuation = TruthTableComputer.wedgeValuations(
+				prefixValuation = Clause.wedgeValuations(
 						prefixValuation, valuations.elementAt(i));
 			}
 		}
@@ -195,23 +210,21 @@ public class FormulaGenerator {
 	 *         {@link SigmaFPair#f}.
 	 */
 	public SigmaFPair generateConsequence() {
-		Set<Formula> sigma = generateUnsatSigma();
+		Sigma sigma = generateUnsatSigma();
 		Formula negated = null;
 		for (Formula f : sigma) {
 			if (negated == null) {
 				negated = f;
 				continue;
 			}
-			if (f instanceof CompoundFormula) {
-				if (((CompoundFormula) f).getConnective() == UnaryConnective.NOT) {
-					negated = f;
-					continue;
-				}
+			if (f instanceof Not) {
+				negated = f;
+				continue;
 			}
 		}
 		sigma.remove(negated);
-		return new SigmaFPair(sigma, new CompoundFormula(UnaryConnective.NOT,
-				new Formula[] { negated }).normalize());
+		Formula f = new Not(new Formula[] { negated }).normalize();
+		return new SigmaFPair(sigma, f);
 	}
 
 	/**

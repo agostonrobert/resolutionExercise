@@ -10,11 +10,11 @@ public class PrintStreamLatexWrapper extends PrintStream {
 
 	final static Map<String, String> translations = new HashMap<String, String>();
 	static {
-		translations.put(BinaryConnective.IMPLIES.toString(), " \\\\to ");
-		translations.put(UnaryConnective.NOT.toString(), "\\\\neg ");
-		translations.put(AssociativeConnective.AND.toString(), " \\\\wedge ");
-		translations.put(AssociativeConnective.OR.toString(), " \\\\vee ");
-		translations.put(ClausePrinter.EMPTY_CLAUSE_STRING, "\\\\Box ");
+		translations.put(Implies.CONNECTIVE_STRING, " \\\\to ");
+		translations.put(Not.CONNECTIVE_STRING, "\\\\neg ");
+		translations.put(And.CONNECTIVE_STRING, " \\\\wedge ");
+		translations.put(Or.CONNECTIVE_STRING, " \\\\vee ");
+		translations.put(Clause.EMPTY_CLAUSE_STRING, "\\\\Box ");
 		translations.put("[{]", "\\\\{");
 		translations.put("[}]", "\\\\}");
 		translations.put("\\|=", "\\\\models ");

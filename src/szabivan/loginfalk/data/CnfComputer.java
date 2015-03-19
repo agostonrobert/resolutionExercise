@@ -6,23 +6,20 @@ package szabivan.loginfalk.data;
  * - set of formulas
  * - or a consequence of the form Sigma |= F.
  *
- * TODO consider using {@link BitSet} for representing clauses instead of ints.
- * 
  * @author szabivan
  * @version 1.0
  */
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class CnfComputer {
 	public static Set<Integer> wedgeCnfs(Set<Integer>[] cnfs) {
-		return TruthTableComputer.veeValuations(cnfs);
+		return Clause.veeValuations(cnfs);
 	}
 
 	public static Set<Integer> veeCnfs(Set<Integer>[] cnfs) {
-		return TruthTableComputer.wedgeValuations(cnfs);
+		return Clause.wedgeValuations(cnfs);
 	}
 
 	/**
@@ -48,17 +45,19 @@ public class CnfComputer {
 	public static Set<Integer> createCnf(Formula formula, boolean retainValue) {
 		if (formula instanceof TruthVariable) {
 			// a TruthVariable is
-			return retainValue ? Collections
-					.singleton(1 << (2 * ((TruthVariable) formula).varIndex))
-					: Collections
-							.singleton(1 << (1 + 2 * ((TruthVariable) formula).varIndex));
+			TruthVariable truthVariable = (TruthVariable) formula;
+			Integer clause = retainValue ? truthVariable.toClause() : truthVariable.toNegatedClause();
+			Set<Integer> cnf = new HashSet<Integer>();
+			cnf.add(clause);
+			return cnf;
 		}
+
 		CompoundFormula compoundFormula = (CompoundFormula) formula;
-		Connective conn = compoundFormula.getConnective();
-		if (conn == UnaryConnective.NOT) {
+
+		if (compoundFormula instanceof Not) {
 			return createCnf(compoundFormula.getSubFormula(0), !retainValue);
 		}
-		if (conn == BinaryConnective.IMPLIES) {
+		if (compoundFormula instanceof Implies) {
 			if (retainValue) {
 				return veeCnfs(new Set[] {
 						createCnf(compoundFormula.getSubFormula(0), false),
@@ -69,38 +68,29 @@ public class CnfComputer {
 						createCnf(compoundFormula.getSubFormula(1), false) });
 			}
 		}
-		if (conn instanceof AssociativeConnective) {
+		if (compoundFormula instanceof Associative) {
 			Set<Integer>[] subcnfs = new Set[compoundFormula
 					.getSubFormulaCount()];
 			for (int i = 0; i < compoundFormula.getSubFormulaCount(); i++) {
 				subcnfs[i] = createCnf(compoundFormula.getSubFormula(i),
 						retainValue);
 			}
-			if (conn == AssociativeConnective.OR) {
+			if (compoundFormula instanceof Or) {
 				return retainValue ? veeCnfs(subcnfs) : wedgeCnfs(subcnfs);
 			}
-			if (conn == AssociativeConnective.AND) {
+			if (compoundFormula instanceof And) {
 				return retainValue ? wedgeCnfs(subcnfs) : veeCnfs(subcnfs);
 			}
 		}
-		throw new IllegalArgumentException("CnfComputer: connective " + conn
+		throw new IllegalArgumentException("CnfComputer: connective " + compoundFormula.getClass().getName()
 				+ " is not supported");
 	}
 
-	public static Set<Integer> createCnf(Set<Formula> sigma) {
-		Set<Integer> ret = new HashSet<Integer>();
-		for (Formula form : sigma) {
-			ret.addAll(createCnf(form, true));
-		}
-		return ret;
-	}
-
-	public static Set<Integer> createCnf(SigmaFPair pair) {
-		Set<Integer> ret = new HashSet<Integer>();
-		for (Formula form : pair.sigma) {
-			ret.addAll(createCnf(form, true));
-		}
-		ret.addAll(createCnf(pair.f, false));
-		return ret;
-	}
+//	public static Set<Integer> createCnf(Set<Formula> sigma) {
+//		Set<Integer> ret = new HashSet<Integer>();
+//		for (Formula form : sigma) {
+//			ret.addAll(createCnf(form, true));
+//		}
+//		return ret;
+//	}
 }

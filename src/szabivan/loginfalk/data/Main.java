@@ -60,7 +60,7 @@ public class Main {
 		stream.println();
 		stream.println("SOLUTION.");
 		stream.println("  I. Transform each member of Sigma and "
-				+ UnaryConnective.NOT.toString() + "F to CNF.");
+				+ Not.CONNECTIVE_STRING + "F to CNF.");
 		stream.println("     The resulting set of nontrivial clauses is");
 		Set<Integer> sigmaPrime = exercise.sigmaPrime;
 		stream.print("    Sigma' = {");
@@ -69,7 +69,7 @@ public class Main {
 			if (hadElement)
 				stream.print(",");
 			stream.print(" ");
-			stream.print(ClausePrinter.toString(clause, maxVars));
+			stream.print(Clause.toString(clause, maxVars));
 			hadElement = true;
 		}
 		stream.println("}");
@@ -81,7 +81,7 @@ public class Main {
 			stream.print(i + 1);
 			stream.print(". ");
 			ClauseReason reason = reasons.get(i);
-			stream.print(ClausePrinter.toString(reason.clause, maxVars));
+			stream.print(Clause.toString(reason.clause, maxVars));
 			if (reason.fromClause1 == -1) {
 				stream.println(" is in Sigma'");
 			} else {
@@ -93,7 +93,7 @@ public class Main {
 			}
 		}
 		stream.println("\n  Since "
-				+ ClausePrinter.toString(0, 1)
+				+ Clause.toString(0, 1)
 				+ " is in Res*(Sigma'),\n  Sigma' is unsatisfiable,\n  hence Sigma |= F indeed holds.");
 
 	}

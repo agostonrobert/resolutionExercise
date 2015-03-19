@@ -10,17 +10,24 @@ package szabivan.loginfalk.data;
  * @version 1.0
  */
 
-import java.util.Vector;
+/**
+ * Empty interface for the logical connectives. TODO a method like acceptsArity(
+ * int ) would be handy for verifying construction attempts of compound
+ * formulas. Maybe later.
+ * 
+ * @see {@link CompoundFormula}
+ * 
+ * @author szabivan
+ * @version 1.0
+ */
+public abstract class CompoundFormula implements Formula {
 
-public class CompoundFormula implements Formula {
-	/**
-	 * The top-level {@link Connective} of the formula.
-	 */
-	private final Connective connective;
+	protected abstract String getConnectiveString();
+
 	/**
 	 * The array containing the immediate subformulas in order.
 	 */
-	private final Formula[] subformulas;
+	protected final Formula[] subformulas;
 
 	/**
 	 * @param connective
@@ -30,16 +37,8 @@ public class CompoundFormula implements Formula {
 	 *            validity is NOT checked for efficiency. ENH not-null values
 	 *            are NOT checked for efficiency.
 	 */
-	public CompoundFormula(Connective connective, Formula[] subformulaArray) {
-		this.connective = connective;
+	protected CompoundFormula(Formula[] subformulaArray) {
 		this.subformulas = subformulaArray;
-	}
-
-	/**
-	 * @return the top-level connective of the formula.
-	 */
-	public Connective getConnective() {
-		return this.connective;
 	}
 
 	/**
@@ -72,78 +71,15 @@ public class CompoundFormula implements Formula {
 	}
 
 	@Override
-	/**
-	 * Returns a human-readable string representation of the formula.
+	/*
+	 * "How about writing exception texts containing INFORMATION about the problem, eh?"
 	 */
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		if (connective instanceof UnaryConnective) {
-			builder.append(connective.toString());
-			if (!subformulas[0].isAtomic())
-				builder.append('(');
-			builder.append(subformulas[0].toString());
-			if (!subformulas[0].isAtomic())
-				builder.append(')');
-		} else if (connective instanceof BinaryConnective) {
-			if (!subformulas[0].isAtomic())
-				builder.append('(');
-			builder.append(subformulas[0].toString());
-			if (!subformulas[0].isAtomic())
-				builder.append(')');
-			builder.append(connective.toString());
-			if (!subformulas[1].isAtomic())
-				builder.append('(');
-			builder.append(subformulas[1].toString());
-			if (!subformulas[1].isAtomic())
-				builder.append(')');
-		} else if (connective instanceof AssociativeConnective) {
-			for (int i = 0; i < subformulas.length; i++) {
-				if (i > 0)
-					builder.append(connective.toString());
-				if (!subformulas[i].isAtomic()) {
-					builder.append('(');
-				}
-				builder.append(subformulas[i].toString());
-				if (!subformulas[i].isAtomic()) {
-					builder.append(')');
-				}
-			}
-		} else
-			throw new UnsupportedOperationException(
-					"How about writing exception texts containing INFORMATION about the problem, eh?");
-		return builder.toString();
-	}
+	public abstract String toString();
 
 	@Override
 	public Formula normalize() {
 		for (int i = 0; i < subformulas.length; i++) {
 			subformulas[i] = subformulas[i].normalize();
-		}
-		if (this.connective == UnaryConnective.NOT) {
-			if (subformulas[0] instanceof CompoundFormula) {
-				CompoundFormula subFormula = (CompoundFormula) subformulas[0];
-				if (subFormula.getConnective() == UnaryConnective.NOT) {
-					return subFormula.getSubFormula(0);
-				}
-			}
-			return this;
-		}
-		if (this.connective instanceof AssociativeConnective) {
-			Vector<Formula> newSubformulas = new Vector<Formula>();
-			for (Formula subFormula : this.subformulas) {
-				if (subFormula instanceof CompoundFormula) {
-					CompoundFormula subCompound = (CompoundFormula) subFormula;
-					if (subCompound.getConnective() == this.connective) {
-						for (Formula form : subCompound.subformulas) {
-							newSubformulas.add(form);
-						}
-					} else
-						newSubformulas.add(subFormula);
-				} else
-					newSubformulas.add(subFormula);
-			}
-			return new CompoundFormula(this.connective,
-					newSubformulas.toArray(this.subformulas));
 		}
 		return this;
 	}

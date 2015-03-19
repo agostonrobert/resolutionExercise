@@ -8,28 +8,6 @@ import java.util.Set;
 import java.util.Vector;
 
 public class Resolver {
-	// MAGIC. do not touch.
-	public static int resolve(int clause1, int clause2) {
-		int vee = clause1 | clause2;
-		int test = vee & (vee >> 1) & 0x1555555;
-		if (test == 0)
-			return -1;
-		if ((test & (test - 1)) != 0)
-			return -1;
-		return vee & ~(test | (test << 1));
-	}
-
-	public static boolean isTrivial(int clause) {
-		return TruthTableComputer.isClash(clause);
-	}
-
-	public static boolean isSubsetOf(int clause1, int clause2) {
-		return ((clause1 & clause2) == clause1);
-	}
-
-	public static boolean isUnit(int clause) {
-		return ((clause & (clause - 1)) == 0);
-	}
 
 	public static class ClauseReason {
 		final int clause;
@@ -56,9 +34,9 @@ public class Resolver {
 		Iterator<Integer> minimalIterator = minimals.iterator();
 		while (minimalIterator.hasNext()) {
 			int oldMinimal = minimalIterator.next();
-			if (isSubsetOf(oldMinimal, clause))
+			if (Clause.isSubsetOf(oldMinimal, clause))
 				return false;
-			if (isSubsetOf(clause, oldMinimal)) {
+			if (Clause.isSubsetOf(clause, oldMinimal)) {
 				minimalIterator.remove();
 				for (int i = 0; i < bitCount; i++) {
 					if ((oldMinimal & (1 << i)) != 0) {
@@ -85,7 +63,7 @@ public class Resolver {
 			lookupTable.add(new HashSet<Integer>());
 		}
 		for (int clause : sigma) {
-			if (isTrivial(clause))
+			if (Clause.isTrivial(clause))
 				continue;
 			if (addClause(clause)) {
 				reasons.put(clause, new ClauseReason(clause));
@@ -96,7 +74,7 @@ public class Resolver {
 			for (int i = 0; i < bitCount; i += 2) {
 				for (int clause1 : lookupTable.get(i)) {
 					for (int clause2 : lookupTable.get(i + 1)) {
-						int resolvent = resolve(clause1, clause2);
+						int resolvent = Clause.resolve(clause1, clause2);
 						if (resolvent == -1)
 							continue;
 						resNew.add(new ClauseReason(resolvent, clause1, clause2));

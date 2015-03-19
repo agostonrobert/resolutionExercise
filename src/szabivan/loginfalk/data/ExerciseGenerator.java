@@ -17,10 +17,10 @@ public class ExerciseGenerator {
 	private static final FormulaGenerator generator = new FormulaGenerator();
 	static {
 		// here come the magic constants :P
-		generator.setWeight(UnaryConnective.NOT, 1);
-		generator.setWeight(AssociativeConnective.OR, 1);
-		generator.setWeight(AssociativeConnective.AND, 1);
-		generator.setWeight(BinaryConnective.IMPLIES, 1);
+		generator.setWeight(Not.CONNECTIVE_STRING, 1);
+		generator.setWeight(Or.CONNECTIVE_STRING, 1);
+		generator.setWeight(And.CONNECTIVE_STRING, 1);
+		generator.setWeight(Implies.CONNECTIVE_STRING, 1);
 		generator.setAtomicWeight(3);
 	}
 	private static final Resolver resolver = new Resolver();
@@ -46,10 +46,10 @@ public class ExerciseGenerator {
 
 		while (trials-- > 0) {
 			SigmaFPair input = generator.generateConsequence();
-			Set<Integer> sigmaPrime = CnfComputer.createCnf(input);
+			Set<Integer> sigmaPrime = input.createCnf();
 			int units = 0;
 			for (Integer clause : sigmaPrime) {
-				if (Resolver.isUnit(clause))
+				if (Clause.isUnit(clause))
 					units++;
 			}
 			if (units < minUnits)

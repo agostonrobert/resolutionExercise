@@ -10,11 +10,11 @@ public class PrintStreamWrapper extends PrintStream {
 
 	final static Map<String, String> translations = new HashMap<String, String>();
 	static {
-		translations.put(BinaryConnective.IMPLIES.toString(), " -> ");
-		translations.put(UnaryConnective.NOT.toString(), "~");
-		translations.put(AssociativeConnective.AND.toString(), " & ");
-		translations.put(AssociativeConnective.OR.toString(), " V ");
-		translations.put(ClausePrinter.EMPTY_CLAUSE_STRING, "[]");
+		translations.put(Implies.CONNECTIVE_STRING, " -> ");
+		translations.put(Not.CONNECTIVE_STRING, "~");
+		translations.put(And.CONNECTIVE_STRING, " & ");
+		translations.put(Or.CONNECTIVE_STRING, " V ");
+		translations.put(Clause.EMPTY_CLAUSE_STRING, "[]");
 	}
 
 	public PrintStreamWrapper(PrintStream stream) {
